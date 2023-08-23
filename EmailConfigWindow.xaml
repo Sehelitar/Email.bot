@@ -1,0 +1,50 @@
+﻿<Window x:Class="EmailBot.EmailConfigWindow" x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EmailBot"
+        mc:Ignorable="d"
+        Title="Email Notifier - Configuration" Width="440" ResizeMode="NoResize" Height="555">
+        <StackPanel Margin="8,8,8,8">
+            <GroupBox Header="Google API Credentials">
+                <StackPanel Margin="8,8,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <Image x:Name="GmailIcon" Height="56"></Image>
+                        <TextBlock TextWrapping="Wrap" Text="You need to provide a valid credentials.json file to access Gmail API." Margin="16,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="290" />
+                    </StackPanel>
+                    <Grid Margin="0,8,0,0">
+                        <TextBlock Grid.Column="0" x:Name="CredFilename" Text="No file selected" Foreground="#FF606060" VerticalAlignment="Center" />
+                    <Button  Grid.Column="1" x:Name="CredSelect" Width="82" HorizontalAlignment="Right" Click="CredSelect_Click" Padding="4,4,4,4" VerticalAlignment="Center" VerticalContentAlignment="Center">📂 Browse</Button>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Emails label">
+                <StackPanel Margin="8,8,8,8">
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" HorizontalAlignment="Left">
+                        Fetch emails with this label. By default, all emails in your inbox are labelled with "INBOX". <Hyperlink  NavigateUri="https://developers.google.com/gmail/api/guides/labels" RequestNavigate="HyperlinkRequestNavigate">Click here</Hyperlink> to read more about labels.
+                    </TextBlock>
+                    <TextBox x:Name="label" TextChanged="LabelTextChanged" Padding="4,4,4,4" BorderBrush="#FFB0B0B0">INBOX</TextBox>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Emails query filter">
+                <StackPanel Margin="8,8,8,8">
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" HorizontalAlignment="Left">
+                        Query filter used to target specific emails. <Hyperlink NavigateUri="https://support.google.com/mail/answer/7190" RequestNavigate="HyperlinkRequestNavigate">Click here</Hyperlink> to read more about filters.
+                    </TextBlock>
+                    <TextBox x:Name="query" TextChanged="QueryTextChanged" Padding="4,4,4,4" BorderBrush="#FFB0B0B0">is:unread</TextBox>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Polling interval">
+                <StackPanel Margin="8,8,8,8">
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" HorizontalAlignment="Left" InputScope="Digits">
+                        Set the interval (in seconds) between 2 checks. It is highly recommanded to not set this below 5 seconds to avoid rate limits.
+                    </TextBlock>
+                    <TextBox x:Name="pollerDelay" TextChanged="PollerDelayTextChanged" Padding="4,4,4,4" BorderBrush="#FFB0B0B0">60</TextBox>
+                </StackPanel>
+            </GroupBox>
+            <StackPanel Orientation="Horizontal" Margin="8,8,8,0" HorizontalAlignment="Right">
+                <Button Width="82" x:Name="SaveButton" Click="SaveButton_Click" Padding="6,6,6,6" FontWeight="SemiBold">💾 Save</Button>
+            </StackPanel>
+        </StackPanel>
+</Window>
