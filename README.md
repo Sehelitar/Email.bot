@@ -8,10 +8,11 @@ Compatible only with Streamer.bot **> 0.2.0**
 
 ## Compilation
 
-To build this extension, you need 2 things :
+To build this extension, you only need a few things :
 
+* nuget dependencies freshly installed
 * DLL files from a Streamer.bot install (a fresh install will do, no need for a fully configured one).
-* A ``credentials.json`` file to access Google's Gmail API.
+* A ``credentials.json`` file to access Google's Gmail API (see https://support.google.com/googleapi/answer/6158862)
 
 ## Installation
 
@@ -36,10 +37,16 @@ Some arguments are provided :
 | Header | Type   | Value  |
 | :----- | :----- | :----- |
 | emailId | string| Email unique ID |
-| emailDate | DateTime | Date of the moment this email was sent |
-| emailFrom | string | Sender infos - RFC 822 (ex: "Bilbo Baggins" <bilbo@mordor.com>)
+| emailDate | DateTime | DateTime of the moment this email was sent |
+| emailFrom | string | Sender infos - RFC 822 (ex: ``"Bilbo Baggins" <bilbo@mordor.com>``)
 | emailSubject | string | Email subject |
-| emailBody | string | Email text body (if available) or null (a bit buggy for the moment) |
+
+2 C# methods are available to fetch emails bodies :
+* FetchEmailHtmlBody
+* FetchEmailTextBody
+
+Both methods require to have ``emailId`` argument set with the email id.
+They will both set the argument ``emailBody`` (string) only if a matching content body can be found, it will stay undefined is there's no matches.
 
 ## Licence
 

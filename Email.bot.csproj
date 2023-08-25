@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net4.7.2</TargetFramework>
-    <Version>0.3.0.0</Version>
+    <Version>0.3.1.0</Version>
     <Authors>Sehelitar</Authors>
     <Description>Email notification system for Streamer.bot.</Description>
     <Copyright>Sehelitar ©2023</Copyright>
@@ -10,7 +10,7 @@
     <AssemblyName>Email.bot</AssemblyName>
     <RootNamespace>EmailBot</RootNamespace>
     <Title>Emails notifications for Streamer.bot (Gmail only)</Title>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -27,13 +27,6 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.60.0.3084" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Include="EmailConfigWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 
   <ItemGroup>
@@ -75,6 +68,12 @@
     </None>
     <None Update="gmail.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LICENSE-Google.Apis.Gmail.v1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

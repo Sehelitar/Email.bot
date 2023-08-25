@@ -25,6 +25,16 @@ namespace EmailBot
             return Convert.ToBase64String(input);
         }
 
+        public static string DecodeBase64Url(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return "";
+
+            input = input.Replace("-", "+").Replace("_", "/");
+            return Encoding.UTF8.GetString( Convert.FromBase64String(input) );
+
+        }
+
         public static string ToProtectedData(this object input)
         {
             return ProtectedData.Protect(

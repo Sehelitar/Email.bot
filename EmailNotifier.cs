@@ -232,6 +232,70 @@ namespace EmailBot
             }
         }
 
+        public void FetchEmailBody(string messageId, bool asHtml = false)
+        {
+            try
+            {
+                Message email = EmailService.Users.Messages.Get("me", messageId).Execute();
+
+                // Check Body for non-multipart content
+                var bodyPart = email.Payload.Body;
+
+                // Body can be provided as an attachment, so check that first
+                if (bodyPart?.AttachmentId != null && bodyPart?.AttachmentId != string.Empty)
+                    bodyPart = EmailService.Users.Messages.Attachments.Get("me", messageId, bodyPart.AttachmentId).Execute();
+
+                // If the body is clear, decode it and we're done
+                string body = bodyPart.Data?.DecodeBase64Url();
+                if (body != null && body != string.Empty)
+                {
+                    var payloadContentTypeL = from header in email.Payload.Headers
+                                where header.Name.ToLower() == "content-type" && (header.Value.StartsWith("text/html") || header.Value.StartsWith("text/plain"))
+                                select (IsHtml: header.Value.StartsWith("text/html"), Body: bodyPart.Data.DecodeBase64Url());
+
+                    // If Content-Type is "text/html" or "text/plain", we should have exactly 1 result.
+                    if (payloadContentTypeL.Count() > 0)
+                    {
+                        var contentType = payloadContentTypeL.First();
+                        if(!(contentType.IsHtml ^ asHtml))
+                        {
+                            BotProxy.SetArgument("emailBody", contentType.Body);
+                        }
+                        return;
+                    }
+
+                    // Or we'll try our luck elsewhere
+                }
+
+                if (email.Payload.Parts.Count > 0)
+                {
+                    var parts = from emailPart in email.Payload.Parts
+                                from header in emailPart.Headers
+                                where header.Name.ToLower() == "content-type" && (header.Value.StartsWith("text/html") || header.Value.StartsWith("text/plain"))
+                                select (IsHtml: header.Value.StartsWith("text/html"), emailPart.Body);
+
+                    foreach (var (IsHtml, Body) in parts)
+                    {
+                        bodyPart = Body;
+                        if (!(IsHtml ^ asHtml))
+                        {
+                            // Part body can be provided as an attachment, so check that first
+                            if (bodyPart.AttachmentId != null && bodyPart.AttachmentId != string.Empty)
+                                bodyPart = EmailService.Users.Messages.Attachments.Get("me", messageId, bodyPart.AttachmentId).Execute();
+
+                            if(bodyPart.Data != null && bodyPart.Data != string.Empty)
+                            {
+                                BotProxy.SetArgument("emailBody", bodyPart.Data.DecodeBase64Url());
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                BotProxy.LogDebug("[Email.bot] Failed to fetch email body : " + e);
+            }
+        }
+
         private void CheckEmails(object state)
         {
             BotProxy.LogVerbose("[Email.bot] Checking emails ...");
@@ -258,31 +322,11 @@ namespace EmailBot
                                 }
                                 BotProxy.LogDebug("[Email.bot] New email found Id=" + email.Id + " InternalDate=" + email.InternalDate);
 
-                                string body = email.Payload.Body.Data;
-                                if (body == null || body == string.Empty)
-                                {
-                                    if (email.Payload.Parts.Count > 0)
-                                    {
-                                        var part = email.Payload.Parts[0].Body;
-                                        if (part.AttachmentId != null && part.AttachmentId != string.Empty)
-                                        {
-                                            var attachmentData = EmailService.Users.Messages.Attachments.Get("me", message.Id, part.AttachmentId).Execute();
-                                            body = attachmentData.Data;
-                                        }
-                                    }
-                                    else if (email.Payload.Body.AttachmentId != null && email.Payload.Body.AttachmentId != string.Empty)
-                                    {
-                                        var attachmentData = EmailService.Users.Messages.Attachments.Get("me", message.Id, email.Payload.Body.AttachmentId).Execute();
-                                        body = attachmentData.Data;
-                                    }
-                                }
-
                                 BotProxy.TriggerCodeEvent("NewEmailReceived", new Dictionary<string, object>() {
                                     { "emailId", email.Id },
                                     { "emailDate", DateTimeOffset.FromUnixTimeMilliseconds(email.InternalDate.GetValueOrDefault(DateTimeOffset.Now.ToUnixTimeMilliseconds())).DateTime },
                                     { "emailFrom", (from header in email.Payload.Headers where header.Name.ToLower() == "from" select header.Value).FirstOrDefault() },
-                                    { "emailSubject", (from header in email.Payload.Headers where header.Name.ToLower() == "subject" select header.Value).FirstOrDefault() },
-                                    { "emailBody", body }
+                                    { "emailSubject", (from header in email.Payload.Headers where header.Name.ToLower() == "subject" select header.Value).FirstOrDefault() }
                                 });
                                 PastIds.Add(email.Id);
                             }
